@@ -10,6 +10,8 @@ namespace TCT_EDI_Organizer.Models
     {
         public string LineCode { get; set; }
         public int Id { get; set; }
+
+        public bool HasErrors { get; set; }
         public List<EdiColumn> Columns { get; set; } = new List<EdiColumn>();
 
         public EdiLine(int id, string lineCode)

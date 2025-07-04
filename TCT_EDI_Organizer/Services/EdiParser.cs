@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
@@ -267,12 +268,15 @@ namespace TCT_EDI_Organizer.Services
                     string vehicleCodetext = matchStart329.Groups[2].Value.Trim();
                     string collectTypeText = ramainingColumn[5].Trim();
 
+                    //VALIDAÇÃO - VEÍCULOS
                     ValidateVehicle(line329, vehicleCodetext);
+
+                    //VALIDAÇÃO - TIPO E COLETA
                     ValidateCollectType(line329, collectTypeText);
 
                     for (int c = 0; c < ramainingColumn.Count; c++)
                     {
-                        if(!skippedColumns.Contains(c + expectedNonRemainingColumns))
+                        if (!skippedColumns.Contains(c + expectedNonRemainingColumns))
                         {
                             line329.AddValidColumn(c + expectedNonRemainingColumns, ramainingColumn[c].ToString());
 
@@ -289,6 +293,9 @@ namespace TCT_EDI_Organizer.Services
             {
                 line329.AddInvalidColumn(0, line329Text, "Início da linha com formato inválido.");
             }
+
+            line329.HasErrors = line329.Columns.Any(c => !c.IsValidated);
+
 
             return line329;
         }
@@ -322,6 +329,7 @@ namespace TCT_EDI_Organizer.Services
                     string branchNameText = matchStart322.Groups[2].Value.Trim();
                     string branchCodeText = matchStart322.Groups[3].Value.Trim();
 
+                    //VALIDAÇÃO - FILIAL
                     ValidateBranch(line322, branchNameText, branchCodeText);
 
                     for (int c = 0; c < ramainingColumn.Count; c++)
@@ -344,7 +352,24 @@ namespace TCT_EDI_Organizer.Services
                 line322.AddInvalidColumn(0, line322Text, "Início da linha com formato inválido.");
             }
 
+            line322.HasErrors = line322.Columns.Any(c => !c.IsValidated);
+
             return line322;
+        }
+
+        private List<EdiColumn> GetErrorColumns(EdiLine ediLine)
+        {
+            var errorColumns = ediLine.Columns.Where(w => w.IsValidated).ToList();
+
+            if(errorColumns != null && errorColumns.Count > 0)
+            {
+                var deepCloneErrorColumns = JsonConvert.DeserializeObject<List<EdiColumn>>(
+                JsonConvert.SerializeObject(errorColumns));
+
+                return deepCloneErrorColumns;
+            }
+
+            return new List<EdiColumn>();            
         }
 
         private void ValidateCollectType(EdiLine line, string collectTypeText)

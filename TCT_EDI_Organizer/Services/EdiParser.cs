@@ -295,6 +295,7 @@ namespace TCT_EDI_Organizer.Services
             }
 
             line329.HasErrors = line329.Columns.Any(c => !c.IsValidated);
+            var errorColumns = GetErrorColumns(line329);
 
 
             return line329;
@@ -353,6 +354,7 @@ namespace TCT_EDI_Organizer.Services
             }
 
             line322.HasErrors = line322.Columns.Any(c => !c.IsValidated);
+            var errorColumns = GetErrorColumns(line322);
 
             return line322;
         }
